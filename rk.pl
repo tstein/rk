@@ -1,69 +1,49 @@
 #!/usr/bin/perl
+# vim:filetype=perl foldmethod=marker autoindent expandtab shiftwidth=4
+
+package rk::main;
+push(@INC, ".");
 
 use warnings;
 use strict;
+use Curses;
 use Switch;
+use rk::UI;
+
+$rk::main::banner = "Welcome to RK!";
 
 my($cmdline, $cmd, $arg, $continue);
-my $regex;
-my @tests;
 
 
 
-sub runRE {
-    $regex = $_[0];
-    print("Running regex: $regex\n");
-    foreach my $test (@tests) {
-        if ($test =~ $regex) {
-            print("\tPASS: ");
-        } else {
-            print("\tFAIL: ");
-        }
-        print("$test\n");
-    }
+# signals {{{
+sub cleanup {
+    endwin();
 }
 
-sub addTest {
-    unless ($_[0]) {
-        print("Cannot add empty test.\n");
-        return;
-    }
-
-    push(@tests, $_[0]);
-    print("Added test: $_[0]\n");
+sub catchWINCH {
+    cleanup();
+    exit(1);
 }
 
-sub listTests {
-    print("Tests currently loaded:\n");
-    foreach my $test (@tests) {
-        print("\t$test\n");
-    }
+sub catchINT {
+    cleanup();
+    exit(1);
 }
 
-sub exitRK {
-    exit($_[0]);
-}
+$SIG{'INT'} = \&catchINT;
+$SIG{'WINCH'} = \&catchINT;
+
+# }}}
+
+
+
+rk::UI::initScreen();
+
 
 $continue = "true";
 $cmdline = "";
 while ($continue) {
-    print("> ");
-
-    $cmdline = readline();
-
-    unless ($cmdline =~ /^([rtle])(?:\s+(.*))?$/) {
-        print("Invalid command.\n");
-        next;
-    }
-
-    $cmd = $1;
-    $arg = $2;
-
-    switch ($cmd) {
-        case "r"    { runRE($arg) }
-        case "t"    { addTest($arg) }
-        case "l"    { listTests() }
-        case "e"    { exitRK(0) }
-    }
+    rk::UI::readstr();
 }
 
