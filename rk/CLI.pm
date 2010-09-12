@@ -1,7 +1,6 @@
 #!/usr/bin/perl
 
 package rk::CLI;
-push(@INC, ".");
 
 use warnings;
 use strict;

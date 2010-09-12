@@ -2,7 +2,6 @@
 # vim:filetype=perl foldmethod=marker autoindent expandtab shiftwidth=4
 
 package rk::main;
-push(@INC, ".");
 
 use warnings;
 use strict;
@@ -23,7 +22,6 @@ sub cleanup {
 
 sub catchWINCH {
     cleanup();
-    exit(1);
 }
 
 sub catchINT {
