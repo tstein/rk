@@ -16,21 +16,17 @@ my($cmdline, $cmd, $arg, $continue);
 
 
 # signals {{{
-sub cleanup {
-    endwin();
-}
-
 sub catchWINCH {
-    cleanup();
+    rk::UI::resetUI();
 }
 
 sub catchINT {
-    cleanup();
+    rk::UI::cleanup();
     exit(1);
 }
 
 $SIG{'INT'} = \&catchINT;
-$SIG{'WINCH'} = \&catchINT;
+$SIG{'WINCH'} = \&catchWINCH;
 
 # }}}
 

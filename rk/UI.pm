@@ -9,7 +9,7 @@ use Switch;
 use rk::CLI;
 
 my($status_bar, $left_pane, $right_pane);
-my @windows = (\$status_bar, \$left_pane, \$right_pane);
+my @windows;
 # The next two variables are used to store the offsets within the history and
 #   test arrays that are currently being shown.
 my($lp_pos, $rp_pos) = (0,0);
@@ -21,7 +21,13 @@ sub cleanup {
         $$window->delwin();
     }
     endwin();
-    exit(shift);
+}
+
+
+
+sub resetUI {
+    cleanup();
+    initScreen();
 }
 
 
@@ -64,10 +70,11 @@ sub redrawHistory {
         $hist_pos = $i + $lp_pos;
 
         # Draw the current history line, with the results of that regex.
-        if ($rk::CLI::history[-$hist_pos]) {
-            $regex = $rk::CLI::history[-$hist_pos];
-            $results = $rk::CLI::results{$regex};
-            $line = "$regex ($results)";
+        if ($rk::regex::regexen[-$hist_pos]) {
+            $regex = $rk::regex::regexen[-$hist_pos];
+            $results  = '(' . rk::regex::testRE($regex);
+            $results .= ' / ' . ($#rk::regex::tests + 1) . ')';
+            $line = "$regex $results";
         }
         $left_pane->addstr($lp_y - 3 - $i, 1, $line);
 
@@ -80,7 +87,7 @@ sub redrawHistory {
         # Draw arrows if there are undrawn lines.
         switch($i) {
             case ($lp_y - 3 - 1)    {
-                if ((scalar @rk::CLI::history)- ($lp_y - 3) - $lp_pos >= 0) {
+                if ((scalar @rk::regex::regexen)- ($lp_y - 3) - $lp_pos >= 0) {
                     $left_pane->addch($lp_y - 3 - $i, $lp_x - 3, '^');
                 } else {
                     $left_pane->addch($lp_y - 3 - $i, $lp_x - 3, ' ');
@@ -171,6 +178,8 @@ sub initScreen {
         }
     }
 
+    @windows = (\$status_bar, \$left_pane, \$right_pane);
+
     resetHistory();
     resetTests();
     resetInput();
@@ -184,7 +193,7 @@ sub readstr {
     %parse = rk::CLI::parse($newstr);
 
     switch ($parse{'type'}) {
-        case 'exit'     {   cleanup(0); }
+        case 'exit'     {   cleanup(); exit(0); }
         case 'regex'    {   resetHistory(); }
         case 'new_test' {   resetTests(); }
     }

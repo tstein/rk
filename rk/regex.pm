@@ -5,18 +5,18 @@ package rk::regex;
 use warnings;
 use strict;
 
-our($last_regex, @tests, %results);
+our(@regexen, @tests, %results);
 
 sub addTest {
     push(@tests, shift);
 }
 
-sub runTests {
-    $last_regex = shift;
+sub testRE {
+    my $re = shift;
     my $num_passed = 0;
 
     foreach my $test (@tests) {
-        if ($test =~ $last_regex) {
+        if ($test =~ $re) {
             $results{$test} = 1;
             ++$num_passed;
         } else {

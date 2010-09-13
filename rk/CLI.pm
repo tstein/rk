@@ -7,7 +7,13 @@ use strict;
 use Switch;
 use rk::regex;
 
-our(@history, %results);
+our(@history);
+
+
+
+sub addRE {
+    push (@rk::regex::regexen, shift)
+}
 
 
 
@@ -44,12 +50,10 @@ sub parse {
 
     my $cmd = shift;
     $cmd =~ s/^\s*(.*?)\s*$/$1/;
+    push(@history, $cmd);
     
     if ($cmd and $cmd !~ /^\//) {
-        push(@history, $cmd);
-        my($num_passed,$num_tests) = (rk::regex::runTests($cmd),
-            scalar @rk::regex::tests);
-        $results{$cmd} = "$num_passed/$num_tests";
+        push(@rk::regex::regexen, $cmd);
         $ret{'type'} = 'regex';
         $ret{'arg'} = $cmd;
         return %ret;
