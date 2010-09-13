@@ -63,7 +63,7 @@ sub resetInput {
 
 
 sub redrawHistory {
-    my($lp_x, $lp_y, $regex, $results, $line, $hist_pos);
+    my($lp_x, $lp_y, $regex, $tests_passed, $results, $line, $hist_pos, $hist_width, $num_spaces);
     $left_pane->getmaxyx($lp_y, $lp_x);
     for (my $i = 1; $i < $lp_y - 3; ++$i) {
         $line = '';
@@ -72,16 +72,23 @@ sub redrawHistory {
         # Draw the current history line, with the results of that regex.
         if ($rk::regex::regexen[-$hist_pos]) {
             $regex = $rk::regex::regexen[-$hist_pos];
-            $results  = '(' . rk::regex::testRE($regex);
+            $tests_passed = rk::regex::testRE($regex);
+            $results  = '(' . $tests_passed;
             $results .= ' / ' . ($#rk::regex::tests + 1) . ')';
-            $line = "$regex $results";
+
+            $left_pane->getmaxyx(my $unused, $hist_width);
+            $num_spaces = $hist_width - 4 - length($regex) - length($results);
+            $line = $regex . (' ' x $num_spaces) . $results;
+        }
+
+        # TODO: Make regexes that pass all loaded tests stand out.
+        if ($tests_passed && $tests_passed == ($#rk::regex::tests + 1)) {
+            #attron(A_BOLD);
         }
         $left_pane->addstr($lp_y - 3 - $i, 1, $line);
-
-        # Pad the line with spaces to overwrite any characters left over from
-        #   the last line.
-        for (my $j = 1 + length($line); $j < $lp_x - 2; ++$j) {
-            $left_pane->addch($lp_y - 3 - $i, $j, ' ');
+        if ($tests_passed && $tests_passed == ($#rk::regex::tests + 1)) {
+            #attroff(A_BOLD);
+            undef($tests_passed);
         }
 
         # Draw arrows if there are undrawn lines.
@@ -99,6 +106,9 @@ sub redrawHistory {
                 } else {
                     $left_pane->addch($lp_y - 3 - $i, $lp_x - 3, ' ');
                 }
+            }
+            else {
+                $left_pane->addch($lp_y - 3 - $i, $lp_x - 3, ' ');
             }
         }
     }
