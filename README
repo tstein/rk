@@ -1,0 +1,24 @@
+
+                  @@@@@      @@  @@@
+                  @@   @     @@ @@@
+                  @@@@@      @@@@@
+                  @@  @@     @@  @@                  ######################
+                  @@   @     @@   @@               #########################
+##########################################################
+#########################################################
+ ####################################################
+   ################################################
+
+
+rk (short for regex kitchen) is a an interactive tool intended to make the task
+of crafting regexes a little less painful. This is my first curses project, and
+I have tried to keep the interface separate from the logic so that I can use the
+same code if I ever decide to pick up GTK+.
+
+rk's design goal is to be somewhat like a fast food restaurant - get in, do what
+you have to, and get out with what you came for as quickly and painlessly as
+possible. Since its intended workflow does not leave it running when it is not
+in active use, I am not especially interested in being 'lightweight': if a
+little more RAM greases the wheels or makes us more responsive, it's probably a
+good trade here.
+
