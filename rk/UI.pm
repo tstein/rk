@@ -132,7 +132,7 @@ sub redrawTests {
 
         # Pad the line with spaces to overwrite any characters left over from
         #   the last line.
-        for (my $j = 1 + length($line); $j < $rp_x - 2; ++$j) {
+        for (my $j = 1 + length($line); $j < $rp_x - 3; ++$j) {
             $right_pane->addch(1 + $i, $j, ' ');
         }
     }

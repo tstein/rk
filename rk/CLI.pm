@@ -23,9 +23,11 @@ sub addTest {
 
 
 
-sub extractTest {
+# Strange - regexes inside cases is apparently bad. extractArg
+# works around this.
+sub extractArg {
     my $cmd = shift;
-    if ($cmd =~ /^\/test\s+(.*)$/) {
+    if ($cmd =~ /^\/\w+\s+(.*)$/) {
         return $1;
     }
 }
@@ -40,6 +42,7 @@ sub parse {
     #       error
     #       regex
     #       new_test
+    #       tests_saved
     #       exit
     #   'arg' => A string for unary commands; an array for n-ary ones. Undefined
     #       for nullary commands.
@@ -61,9 +64,7 @@ sub parse {
 
     switch($cmd) {
         case /^\/test\s/ {
-            # Strange - regexes inside cases is apparently bad. extractTest
-            # works around this.
-            my $new_test = extractTest($cmd);
+            my $new_test = extractArg($cmd);
             if ($new_test) {
                 addTest($new_test);
                 $ret{'type'} = 'new_test';
@@ -71,6 +72,20 @@ sub parse {
             } else {
                 $ret{'type'} = 'error';
                 $ret{'details'} = 'Cannot add an empty test.';
+            }
+        }
+
+        case /^\/savetests\s/ {
+            my $test_file = extractArg($cmd);
+            if ($test_file) {
+                open(TESTS, ">$test_file") or die("Couldn't open tests file for writing: $!");
+                foreach my $test (@rk::regex::tests) {
+                    print(TESTS "$test\n");
+                }
+                $ret{'type'} = 'tests_saved';
+            } else {
+                $ret{'type'} = 'error';
+                $ret{'details'} = 'No test save file given.';
             }
         }
 
