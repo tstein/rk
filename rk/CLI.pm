@@ -63,7 +63,7 @@ sub parse {
     }
 
     switch($cmd) {
-        case /^\/test\s/ {
+        case m/^\/test(\s.*|)/ {
             my $new_test = extractArg($cmd);
             if ($new_test) {
                 addTest($new_test);
@@ -75,7 +75,7 @@ sub parse {
             }
         }
 
-        case /^\/savetests\s/ {
+        case m/^\/savetests\s/ {
             my $test_file = extractArg($cmd);
             if ($test_file) {
                 open(TESTS, ">$test_file") or die("Couldn't open tests file for writing: $!");
@@ -89,7 +89,7 @@ sub parse {
             }
         }
 
-        case /^\/exit$/         {
+        case m/^\/exit$/ {
             $ret{'type'} = 'exit';
         }
 

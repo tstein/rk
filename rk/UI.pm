@@ -8,11 +8,12 @@ use Curses;
 use Switch;
 use rk::CLI;
 
-my($status_bar, $left_pane, $right_pane);
+my($status_bar, $left_pane, $right_pane, $command_bar);
 my @windows;
 # The next two variables are used to store the offsets within the history and
 #   test arrays that are currently being shown.
 my($lp_pos, $rp_pos) = (0,0);
+my $message;
 
 
 
@@ -32,6 +33,17 @@ sub resetUI {
 
 
 
+sub showMessage {
+    my($lp_y, $message, $num_spaces);
+    $left_pane->getmaxyx($lp_y, my $unused);
+
+    $message = shift;
+    $num_spaces = $lp_y - 4 - length($message);
+    $left_pane->addstr($lp_y - 2, 1, $message . (' ' x $num_spaces));
+}
+
+
+
 sub newBoxedWin {
     my $win = newwin(shift, shift, shift, shift);
     $win->box(0, 0);
@@ -42,20 +54,20 @@ sub newBoxedWin {
 
 
 sub resetCursor {
-    my ($lp_x, $lp_y);
-    $left_pane->getmaxyx($lp_y, $lp_x);
-    $left_pane->move($lp_y - 2, 1);
-    $left_pane->refresh();
+    my ($cb_x, $cb_y);
+    $command_bar->getmaxyx($cb_y, $cb_x);
+    $command_bar->move($cb_y - 2, 1);
+    $command_bar->refresh();
 }
 
 
 
 sub resetInput {
-    my($lp_x, $lp_y);
-    $left_pane->getmaxyx($lp_y, $lp_x);
+    my($cb_x, $cb_y);
+    $command_bar->getmaxyx($cb_y, $cb_x);
 
-    for (my $i = 1; $i < $lp_x - 1; ++$i) {
-        $left_pane->addch($lp_y - 2, $i, ' ');
+    for (my $i = 1; $i < $cb_x - 1; ++$i) {
+        $command_bar->addch($cb_y - 2, $i, ' ');
     }
     resetCursor();
 }
@@ -171,13 +183,13 @@ sub initScreen {
     }
     
     $right_pane = newBoxedWin(
-        $LINES - $bar_height,
+        $LINES - (2 * $bar_height),
         $COLS / 2,
         $bar_height,
         $COLS / 2);
 
     $left_pane = newBoxedWin(
-        $LINES - $bar_height,
+        $LINES - (2 * $bar_height),
         $COLS / 2,
         $bar_height,
         0);
@@ -188,7 +200,13 @@ sub initScreen {
         }
     }
 
-    @windows = (\$status_bar, \$left_pane, \$right_pane);
+    $command_bar = newBoxedWin(
+        $bar_height,
+        $COLS - 1,
+        $LINES - $bar_height,
+        0);
+
+    @windows = (\$status_bar, \$left_pane, \$right_pane, \$command_bar);
 
     resetHistory();
     resetTests();
@@ -197,17 +215,21 @@ sub initScreen {
 
 
 sub readstr {
+    $message = "";
+
     my($newstr, %parse);
-    $left_pane->getstr($newstr);
+    $command_bar->getstr($newstr);
     chomp($newstr);
     %parse = rk::CLI::parse($newstr);
 
     switch ($parse{'type'}) {
         case 'exit'     {   cleanup(); exit(0); }
+        case 'error'    {   $message = $parse{'details'}; }
         case 'regex'    {   resetHistory(); }
         case 'new_test' {   resetTests(); }
     }
 
+    showMessage($message);
     redrawHistory();
     resetInput();
 }
