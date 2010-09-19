@@ -95,7 +95,11 @@ sub parse {
 
         else                    {
             $ret{'type'} = 'error';
-            $ret{'details'} = 'Invalid command.';
+            if ($cmd =~ /^$/) {
+                $ret{'details'} = '';
+            } else {
+                $ret{'details'} = 'Invalid command.';
+            }
         }
     }
 

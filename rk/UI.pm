@@ -21,6 +21,7 @@ sub cleanup {
     for my $window (@windows) {
         $$window->delwin();
     }
+    clear();
     endwin();
 }
 
