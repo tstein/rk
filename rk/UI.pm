@@ -1,4 +1,5 @@
 #!/usr/bin/perl
+# vim:filetype=perl foldmethod=marker autoindent expandtab shiftwidth=4
 
 package rk::UI;
 
